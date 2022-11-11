@@ -2,11 +2,14 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import multiprocessing as mp
+import itertools
 
 
 # This has to be an even number to work!
-N_PERSON = 8
-N_ITERATIONS = 50
+N_PERSON = 30
+N_ITERATIONS = 1000
 MIN_CONCENTRATION_INITIAL = 1
 MAX_CONCENTRATION_INITIAL = 5
 PRODUCTION_RATE = 5
@@ -19,6 +22,19 @@ def add_inverse_neighbors(a):
     da += - DEGRADATION_RATE * a
     a += da
     return a
+
+
+def plot_results_ind(res_i, max_value):
+    i, res = res_i
+    cmap = mpl.colormaps['viridis']
+
+    colors = cmap(res/max_value)
+
+    fig, ax = plt.subplots(figsize=(12,12))
+    ax.bar(range(len(res)), res, color=colors)
+
+    plt.savefig("out/chessboard_1d_{:010.0f}.png".format(i))
+    plt.close(fig)
 
 
 if __name__ == "__main__":
@@ -38,14 +54,15 @@ if __name__ == "__main__":
     for i in range(1, N_ITERATIONS+1):
         a = add_inverse_neighbors(a)
         results[i] = a
-    
-    print(results)
 
     fig, (ax1, ax2) = plt.subplots(2, figsize=(12,12))
 
-    for i, r in enumerate(np.array(results).T):
-        ax1.plot(r, label="Result {}".format(i))
-    ax1.legend()
+    p = mp.Pool()
 
-    ax2.bar(range(N_PERSON), results[-1])
-    plt.show()
+    p.starmap(
+        plot_results_ind,
+        zip(
+            enumerate(np.array(results)),
+            itertools.repeat(np.max(results)),
+        )
+    )
