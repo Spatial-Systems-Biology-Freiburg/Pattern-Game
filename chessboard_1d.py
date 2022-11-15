@@ -56,6 +56,11 @@ if __name__ == "__main__":
         results[i] = a
 
     fig, (ax1, ax2) = plt.subplots(2, figsize=(12,12))
+    for i, r in enumerate(np.array(results).T):
+        ax1.plot(r, label="Result {}".format(i))
+    ax1.legend()
+    ax2.bar(range(N_PERSON), results[-1])
+    plt.show()
 
     p = mp.Pool()
 
